@@ -1,16 +1,5 @@
-local Keys = {
-    ["ESC"] = 322, ["F1"] = 288, ["F2"] = 289, ["F3"] = 170, ["F5"] = 166, ["F6"] = 167, ["F7"] = 168, ["F8"] = 169, ["F9"] = 56, ["F10"] = 57,
-    ["~"] = 243, ["1"] = 157, ["2"] = 158, ["3"] = 160, ["4"] = 164, ["5"] = 165, ["6"] = 159, ["7"] = 161, ["8"] = 162, ["9"] = 163, ["-"] = 84, ["="] = 83, ["BACKSPACE"] = 177,
-    ["TAB"] = 37, ["Q"] = 44, ["W"] = 32, ["E"] = 38, ["R"] = 45, ["T"] = 245, ["Y"] = 246, ["U"] = 303, ["P"] = 199, ["["] = 39, ["]"] = 40, ["ENTER"] = 18,
-    ["CAPS"] = 137, ["A"] = 34, ["S"] = 8, ["D"] = 9, ["F"] = 23, ["G"] = 47, ["H"] = 74, ["K"] = 311, ["L"] = 182,
-    ["LEFTSHIFT"] = 21, ["Z"] = 20, ["X"] = 73, ["C"] = 26, ["V"] = 0, ["B"] = 29, ["N"] = 249, ["M"] = 244, [","] = 82, ["."] = 81,
-    ["LEFTCTRL"] = 36, ["LEFTALT"] = 19, ["SPACE"] = 22, ["RIGHTCTRL"] = 70,
-    ["HOME"] = 213, ["PAGEUP"] = 10, ["PAGEDOWN"] = 11, ["DELETE"] = 178,
-    ["LEFT"] = 174, ["RIGHT"] = 175, ["TOP"] = 27, ["DOWN"] = 173,
-  }
-
 -- ESX
-ESX               = nil
+ESX  = nil
 
 Citizen.CreateThread(function()
 	while ESX == nil do
@@ -145,13 +134,13 @@ function OpenKeysMenu()
                                 end
 
                                 if text == nil then
-                                    ESX.ShowNotification('Ungültige eingabe')
+                                    ESX.ShowNotification(_U('invalidEntry'))
                                 elseif Config.RenameKeyLenght < wordcount then
-                                    ESX.ShowNotification("Deine Eingabe ist zu lang")
+                                    ESX.ShowNotification(_U('entryTooLong'))
                                 else
                                     menu.close()
                                     TriggerServerEvent('Alf-Carkeys:renameKey', data.current.id, data.current.plate, text)
-                                    ESX.ShowNotification("Du hast deinen Schlüssel zu ~b~" ..text.. "~s~ umbenannt" )
+                                    ESX.ShowNotification(_U('renamedKey', text) )
                                 end
                             end,
                             function(data, menu)
@@ -160,23 +149,23 @@ function OpenKeysMenu()
                     elseif data2.current.value == 'removeKeyName' then
                         menu.close()
                         TriggerServerEvent('Alf-Carkeys:removeKeyName', data.current.id, data.current.plate)
-                        ESX.ShowNotification("Du hast den Namen deines Schlüssels ~r~emtfernt" )
+                        ESX.ShowNotification(_U('removedKeyLabel'))
                     elseif data2.current.value == 'giveKey' then
                         local reciever, distance = ESX.Game.GetClosestPlayer()
                         if reciever ~= -1 and distance <= 3.0 then
                             TriggerServerEvent('Alf-Carkeys:giveKey', data.current.id, data.current.plate, GetPlayerServerId(reciever))
-                            ESX.ShowNotification('Du hast den Schlüssel mit dem Kennzeichen '..data.current.plate.. ' weitergegeben')
+                            ESX.ShowNotification(_U('gaveKey', data.current.plate))
                         else
-                            ESX.ShowNotification('Es befindet sich kein Spieler in deiner Nähe')
+                            ESX.ShowNotification(_U('noPlayerNearYou'))
                         end
                     elseif data2.current.value == 'deleteKey' then
                         ESX.TriggerServerCallback('Alf-Carkeys:getPlayersKeys', function(keys)
                             for k,key in ipairs(keys) do
                                 if data.current.id and data.current.state == "Original" then 
-                                    ESX.ShowNotification('Du kannst keinen ~r~Originalschlüssel ~s~wegwerfen')
+                                    ESX.ShowNotification(_U('CantDeleteOriginal'))
                                 elseif key.state == "Kopie" or key.state == "Garagenzugriff" then
                                     TriggerServerEvent('Alf-Carkeys:deleteKey', data.current.plate, data.current.id)
-                                    ESX.ShowNotification('Du hast den Fahrzeugschlüssel ~b~' .. data.current.plate.. ' ~r~weggeworfen') 
+                                    ESX.ShowNotification(_U('DeleteKey', data.current.plate)) 
                                 end
                             end
                         end)
@@ -235,9 +224,9 @@ function OpenCopyKeysMenu()
                                     ESX.TriggerServerCallback('Alf-Carkeys:hasmoney', function(enoughmoney)
                                         if enoughmoney then
                                             TriggerServerEvent('Alf-Carkeys:copyKey', data.current.plate, GetPlayerServerId(PlayerId()))
-                                            ESX.ShowNotification('Du hast den Schlüssel für das Fahrzeug ~b~' ..data.current.plate.. '~s~kopiert')
+                                            ESX.ShowNotification(_U('CopiedKey', data.current.plate))
                                         else
-                                            ESX.ShowNotification('Du hast zu wenig Geld dabei')
+                                            ESX.ShowNotification(_U('notEnoughMoney'))
                                         end           
                                     end)
                                 end
@@ -280,9 +269,9 @@ function OpenCopyKeysMenu()
                                     ESX.TriggerServerCallback('Alf-Carkeys:hasmoney2', function(enoughmoney)
                                         if enoughmoney then
                                             TriggerServerEvent('Alf-Carkeys:copyTrustedKey', data.current.plate, GetPlayerServerId(PlayerId()))
-                                            ESX.ShowNotification('Du hast den Schlüssel für das Fahrzeug ~b~' ..data.current.plate.. '~s~kopiert')
+                                            ESX.ShowNotification(_U('CopiedKey', data.current.plate))
                                         else
-                                            ESX.ShowNotification('Du hast zu wenig Geld dabei')
+                                            ESX.ShowNotification(_U('notEnoughMoney'))
                                         end           
                                     end)
                                 end
@@ -344,9 +333,9 @@ function OpenTrustedCopyKeysMenu()
                                     ESX.TriggerServerCallback('Alf-Carkeys:hasmoney', function(enoughmoney)
                                         if enoughmoney then
                                             TriggerServerEvent('Alf-Carkeys:copyKey', data.current.plate, GetPlayerServerId(PlayerId()))
-                                            ESX.ShowNotification('Du hast den Schlüssel für das Fahrzeug ~b~' ..data.current.plate.. '~s~kopiert')
+                                            ESX.ShowNotification(_U('CopiedKey', data.current.plate))
                                         else
-                                            ESX.ShowNotification('Du hast zu wenig Geld dabei')
+                                            ESX.ShowNotification(_U('notEnoughMoney'))
                                         end           
                                     end)
                                 end
@@ -389,9 +378,9 @@ function OpenTrustedCopyKeysMenu()
                                     ESX.TriggerServerCallback('Alf-Carkeys:hasmoney2', function(enoughmoney)
                                         if enoughmoney then
                                             TriggerServerEvent('Alf-Carkeys:copyTrustedKey', data.current.plate, GetPlayerServerId(PlayerId()))
-                                            ESX.ShowNotification('Du hast den Schlüssel für das Fahrzeug ~b~' ..data.current.plate.. '~s~kopiert')
+                                            ESX.ShowNotification(_U('CopiedKey', data.current.plate))
                                         else
-                                            ESX.ShowNotification('Du hast zu wenig Geld dabei')
+                                            ESX.ShowNotification(_U('notEnoughMoney'))
                                         end           
                                     end)
                                 end
@@ -433,7 +422,7 @@ function OpenChangePlateMenu()
                             ESX.TriggerServerCallback('Alf-Carkeys:checkIfPlateExist', function(exists)
                                 if exists then
                                     local text = GetOnscreenKeyboardResult()
-                                    ESX.ShowNotification("~r~Das Kennzeichen ~b~" ..string.upper(text).. "~r~ ist bereits vergeben" )
+                                    ESX.ShowNotification(_U('PlateExists', string.upper(text)))
                                 else
                                     ESX.TriggerServerCallback('Alf-Carkeys:hasmoney3', function(enoughmoney)
                                         if enoughmoney then
@@ -467,12 +456,12 @@ function OpenChangePlateMenu()
                                                 --local vehicleProps = GetVehicleProperties(GetVehiclePedIsIn(GetPlayerPed(-1), false), false)
 
                                                 --TriggerEvent('persistent-vehicles/register-vehicle', GetVehiclePedIsIn(GetPlayerPed(-1), false))
-                                                ESX.ShowNotification("Du hast das Kennzeichen zu ~b~" ..string.upper(text).. "~s~ geändert" )
+                                                ESX.ShowNotification(_U('PlateChanged', string.upper(text)))
                                             else
-                                                ESX.ShowNotification("Das Nummernschild ist ~r~zu Lang~s~ (Max 8 Zeichen)")
+                                                ESX.ShowNotification(_U('NewPlateTooLong'))
                                             end
                                         else
-                                            ESX.ShowNotification("Du hast ~r~zu wenig ~s~Geld")
+                                            ESX.ShowNotification(_U('notEnoughMoney'))
                                         end
                                     end)
                                 end
@@ -563,12 +552,16 @@ function DoorLock()
                     SetVehicleDoorsLocked(localVehId, 2)
                     PlayVehicleDoorCloseSound(localVehId, 1)
     
-                    TriggerEvent('esx:showNotification', 'Fahrzeug ~r~abgeschlossen')   
+                    TriggerEvent('esx:showNotification', _U('VehicleLocked'))
                 elseif lockStatus == 2 then -- locked
                     SetVehicleDoorsLocked(localVehId, 1)
                     PlayVehicleDoorOpenSound(localVehId, 0)
     
-                    TriggerEvent('esx:showNotification', 'Fahrzeug ~g~aufgeschlossen') 
+                    TriggerEvent('esx:showNotification', _U('VehicleUnlocked'))
+		else 
+		    SetVehicleDoorsLocked(localVehId, 2)
+                    PlayVehicleDoorCloseSound(localVehId, 1)
+                    TriggerEvent('esx:showNotification', _U('VehicleLocked'))			
                 end
             else
                 ESX.TriggerServerCallback('Alf-Carkeys:checkIfPlayerHasKey', function(haskey)
@@ -578,15 +571,19 @@ function DoorLock()
                             SetVehicleDoorsLocked(localVehId, 2)
                             PlayVehicleDoorCloseSound(localVehId, 1)
         
-                            TriggerEvent('esx:showNotification', 'Fahrzeug ~r~abgeschlossen')   
+                            TriggerEvent('esx:showNotification', _U('VehicleLocked'))
                         elseif lockStatus == 2 then -- locked
                             SetVehicleDoorsLocked(localVehId, 1)
                             PlayVehicleDoorOpenSound(localVehId, 0)
         
-                            TriggerEvent('esx:showNotification', 'Fahrzeug ~g~aufgeschlossen') 
+                            TriggerEvent('esx:showNotification', _U('VehicleUnlocked'))
+			else 
+			    SetVehicleDoorsLocked(localVehId, 2)
+			    PlayVehicleDoorCloseSound(localVehId, 1)
+			    TriggerEvent('esx:showNotification', _U('VehicleLocked'))	
                         end
                     else
-                        TriggerEvent('esx:showNotification', 'Du hast keinen Schlüssel für dieses Fahrzeug') 
+                        TriggerEvent('esx:showNotification', _U('NoKeyForVehicle')) 
                     end
                 end, localVehPlate)
             --else
@@ -610,13 +607,17 @@ function DoorLock()
                     PlayVehicleDoorCloseSound(localVehId, 1)
                     TaskPlayAnim(GetPlayerPed(-1), dict, "fob_click_fp", 8.0, 8.0, -1, 48, 1, false, false, false)
 
-                    TriggerEvent('esx:showNotification', 'Fahrzeug ~r~abgeschlossen')  
+                    TriggerEvent('esx:showNotification', _U('VehicleLocked'))
                 elseif lockStatus == 2 then -- locked
                     SetVehicleDoorsLocked(localVehId, 1)
                     PlayVehicleDoorOpenSound(localVehId, 0)
                     TaskPlayAnim(GetPlayerPed(-1), dict, "fob_click_fp", 8.0, 8.0, -1, 48, 1, false, false, false)
 
-                    TriggerEvent('esx:showNotification', 'Fahrzeug ~g~aufgeschlossen') 
+                    TriggerEvent('esx:showNotification', _U('VehicleUnlocked'))
+		else 
+		    SetVehicleDoorsLocked(localVehId, 2)
+                    PlayVehicleDoorCloseSound(localVehId, 1)
+                    TriggerEvent('esx:showNotification', _U('VehicleLocked'))	
                 end
             else
                 ESX.TriggerServerCallback('Alf-Carkeys:checkIfPlayerHasKey', function(haskey)
@@ -627,16 +628,20 @@ function DoorLock()
                             PlayVehicleDoorCloseSound(localVehId, 1)
                             TaskPlayAnim(GetPlayerPed(-1), dict, "fob_click_fp", 8.0, 8.0, -1, 48, 1, false, false, false)
         
-                            TriggerEvent('esx:showNotification', 'Fahrzeug ~r~abgeschlossen')   
+                            TriggerEvent('esx:showNotification', _U('VehicleLocked'))
                         elseif lockStatus == 2 then -- locked
                             SetVehicleDoorsLocked(localVehId, 1)
                             PlayVehicleDoorOpenSound(localVehId, 0)
                             TaskPlayAnim(GetPlayerPed(-1), dict, "fob_click_fp", 8.0, 8.0, -1, 48, 1, false, false, false)
         
-                            TriggerEvent('esx:showNotification', 'Fahrzeug ~g~aufgeschlossen') 
+                            TriggerEvent('esx:showNotification', _U('VehicleUnlocked'))
+			else 
+			    SetVehicleDoorsLocked(localVehId, 2)
+			    PlayVehicleDoorCloseSound(localVehId, 1)
+			    TriggerEvent('esx:showNotification', _U('VehicleLocked'))	
                         end
                     else
-                        TriggerEvent('esx:showNotification', 'Du hast keinen Schlüssel für dieses Fahrzeug') 
+                        TriggerEvent('esx:showNotification', _U('NoKeyForVehicle')) 
                     end
                 end, localVehPlate)
             end
@@ -716,7 +721,7 @@ function toggleEngine()
                     end
                 else
                     --print("."..localVehPlate..".")
-                    TriggerEvent('esx:showNotification', 'Du hast keinen Schlüssel für dieses Fahrzeug') 
+                    TriggerEvent('esx:showNotification', _U('NoKeyForVehicle')) 
                 end
             end, localVehPlate)
         end
@@ -817,7 +822,7 @@ Citizen.CreateThread(function ()
             AddTextComponentString(CurrentActionMsg)
             DisplayHelpTextFromStringLabel(0, 0, 1, -1)
 
-            if IsControlJustPressed(0, Keys['E']) then
+            if IsControlJustPressed(0, 38) then
                 if Config.TrustedKeys then
                     OpenTrustedCopyKeysMenu()
                 else
@@ -830,7 +835,7 @@ Citizen.CreateThread(function ()
             AddTextComponentString(CurrentActionMsg)
             DisplayHelpTextFromStringLabel(0, 0, 1, -1)
 
-            if IsControlJustPressed(0, Keys['E']) then
+            if IsControlJustPressed(0, 38) then
                 OpenChangePlateMenu()
             end
         end
@@ -1147,13 +1152,15 @@ function BoatControls()
     end)
 end
 
-RegisterCommand("createkey", function()
-    local localVehId = GetVehiclePedIsIn(GetPlayerPed(-1), false)
-    local localVehPlate = GetVehicleNumberPlateText(localVehId)
-    ESX.TriggerServerCallback('Alf-Carkeys:checkIfKeyExist', function(exists)
-        if not exists then
-            TriggerServerEvent('Alf-Carkeys:createKey', localVehPlate)
-            TriggerEvent('esx:showNotification', 'Du hast einen Schlüssel für das Fahrzeug: '..localVehPlate.. ' erhalten') 
-        end
-    end, localVehPlate)
-end, false)
+if Config.CreateKeyCommand then 
+    RegisterCommand("createkey", function()
+        local localVehId = GetVehiclePedIsIn(GetPlayerPed(-1), false)
+        local localVehPlate = GetVehicleNumberPlateText(localVehId)
+        ESX.TriggerServerCallback('Alf-Carkeys:checkIfKeyExist', function(exists)
+            if not exists then
+                TriggerServerEvent('Alf-Carkeys:createKey', localVehPlate)
+                TriggerEvent('esx:showNotification', _U('gotKey', localVehPlate)) 
+            end
+        end, localVehPlate)
+    end, false)
+end
