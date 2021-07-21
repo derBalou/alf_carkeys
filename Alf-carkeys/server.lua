@@ -2,16 +2,12 @@ ESX               = nil
 TriggerEvent('esx:getSharedObject', function(obj) ESX = obj end)
 
 local engine = {}
-function getIdentifiant(id)
-    local sourcePlayer = ESX.GetPlayerFromId(id)
-    return sourcePlayer.identifier
-end
 
 RegisterServerEvent('Alf-Carkeys:createKey')
 AddEventHandler('Alf-Carkeys:createKey', function(plate)
-	local identifier = getIdentifiant(GetPlayerIdentifiers(source))
+	local xPlayer = ESX.GetPlayerFromId(source)
 	MySQL.Async.execute("INSERT INTO `vehicle_keys`(`identifier`, `plate`, `state`) VALUES (@identifier,@plate,@state)", { 
-        ['@identifier'] = identifier,
+        ['@identifier'] = xPlayer.identifier,
         ['@plate'] = plate,
         ['@state'] = 'Original'
     })
@@ -19,11 +15,11 @@ end)
 
 RegisterServerEvent('Alf-Carkeys:giveKey')
 AddEventHandler('Alf-Carkeys:giveKey', function(id, plate, reciever)
-    local identifier = getIdentifiant(GetPlayerIdentifiers(source))
+    local xPlayer = ESX.GetPlayerFromId(source)
     local reciever = ESX.GetPlayerFromId(reciever)
     MySQL.Async.execute("UPDATE `vehicle_keys` SET `identifier`=@recieverid WHERE identifier = @identifier AND plate = @plate AND id = @id", { 
         ['@recieverid'] = reciever.identifier,
-        ['@identifier'] = identifier,
+        ['@identifier'] = xPlayer.identifier,
         ['@plate'] = plate,
         ['@id'] = id
     })
@@ -31,7 +27,7 @@ end)
 
 RegisterServerEvent('Alf-Carkeys:createKeyForOther')
 AddEventHandler('Alf-Carkeys:createKeyForOther', function(plate, reciever)
-    local identifier = getIdentifiant(GetPlayerIdentifiers(source))
+    local xPlayer = ESX.GetPlayerFromId(source)
     local reciever = ESX.GetPlayerFromId(reciever)
     MySQL.Async.execute("INSERT INTO `vehicle_keys` (`identifier`, `plate`, `state`) VALUES (@reciever,@plate,@state)", { 
         ['@reciever'] = reciever.identifier,
@@ -42,11 +38,11 @@ end)
 
 RegisterServerEvent('Alf-Carkeys:renameKey')
 AddEventHandler('Alf-Carkeys:renameKey', function(id, plate, text)
-    local identifier = getIdentifiant(GetPlayerIdentifiers(source))
+    local xPlayer = ESX.GetPlayerFromId(source)
     local reciever = ESX.GetPlayerFromId(reciever)
     MySQL.Async.execute("UPDATE `vehicle_keys` SET `label`= @label WHERE identifier = @identifier AND plate = @plate AND id = @id", { 
         ['@label'] = text .." - ",
-        ['@identifier'] = identifier,
+        ['@identifier'] = xPlayer.identifier,
         ['@plate'] = plate,
         ['@id'] = id
     })
@@ -54,10 +50,10 @@ end)
 
 RegisterServerEvent('Alf-Carkeys:removeKeyName')
 AddEventHandler('Alf-Carkeys:removeKeyName', function(id, plate)
-    local identifier = getIdentifiant(GetPlayerIdentifiers(source))
+    local xPlayer = ESX.GetPlayerFromId(source)
     local reciever = ESX.GetPlayerFromId(reciever)
     MySQL.Async.execute("UPDATE `vehicle_keys` SET `label`= NULL WHERE identifier = @identifier AND plate = @plate AND id = @id", { 
-        ['@identifier'] = identifier,
+        ['@identifier'] = xPlayer.identifier,
         ['@plate'] = plate,
         ['@id'] = id
     })
@@ -98,14 +94,14 @@ end)
 RegisterServerEvent('Alf-Carkeys:copyKey')
 AddEventHandler('Alf-Carkeys:copyKey', function(plate, reciever)
     local reciever = ESX.GetPlayerFromId(reciever)
-    local identifier = getIdentifiant(GetPlayerIdentifiers(source))
+    local xPlayer = ESX.GetPlayerFromId(source)
     local xPlayer = ESX.GetPlayerFromId(source)
     local price   = Config.KeyPrice
     
     xPlayer.removeMoney(price)
 
     MySQL.Async.execute("INSERT INTO `vehicle_keys`(`identifier`, `plate`, `state`) VALUES (@identifier,@plate,@state)", { 
-        ['@identifier'] = identifier,
+        ['@identifier'] = xPlayer.identifier,
         ['@plate'] = plate,
         ['@state'] = 'Kopie'
     })
@@ -114,14 +110,14 @@ end)
 RegisterServerEvent('Alf-Carkeys:copyTrustedKey')
 AddEventHandler('Alf-Carkeys:copyTrustedKey', function(plate, reciever)
     local reciever = ESX.GetPlayerFromId(reciever)
-    local identifier = getIdentifiant(GetPlayerIdentifiers(source))
+    local xPlayer = ESX.GetPlayerFromId(source)
     local xPlayer = ESX.GetPlayerFromId(source)
     local price   = Config.TrustedKeyPrice
     
     xPlayer.removeMoney(price)
 
     MySQL.Async.execute("INSERT INTO `vehicle_keys`(`identifier`, `plate`, `state`) VALUES (@identifier,@plate,@state)", { 
-        ['@identifier'] = identifier,
+        ['@identifier'] = xPlayer.identifier,
         ['@plate'] = plate,
         ['@state'] = 'Garagenzugriff'
     })
@@ -129,9 +125,9 @@ end)
 
 RegisterServerEvent('Alf-Carkeys:deleteKey')
 AddEventHandler('Alf-Carkeys:deleteKey', function(plate, id)
-    local identifier = getIdentifiant(GetPlayerIdentifiers(source))
+    local xPlayer = ESX.GetPlayerFromId(source)
     MySQL.Async.execute("DELETE FROM `vehicle_keys` WHERE identifier = @identifier AND id = @id AND plate = @plate AND state = 'Kopie' OR identifier = @identifier AND id = @id AND plate = @plate AND state = 'Garagenzugriff'", { 
-        ['@identifier'] = identifier,
+        ['@identifier'] = xPlayer.identifier,
         ['@plate'] = plate,
         ['@id'] = id
     })
@@ -165,9 +161,9 @@ ESX.RegisterServerCallback('Alf-Carkeys:checkIfPlateExist', function(source, cb,
 end)
 
 ESX.RegisterServerCallback('Alf-Carkeys:checkIfPlayerHasKey', function(source, cb, plate)
-	local identifier = getIdentifiant(GetPlayerIdentifiers(source))
+	local xPlayer = ESX.GetPlayerFromId(source)
 	MySQL.Async.fetchAll('SELECT plate FROM vehicle_keys WHERE identifier = @identifier AND plate = @plate', {
-		['@identifier'] = identifier,
+		['@identifier'] = xPlayer.identifier,
         ['@plate'] = plate
 	}, function(result)
 		if result[1] ~= nil then
@@ -205,9 +201,9 @@ ESX.RegisterServerCallback('Alf-Carkeys:checkIfKeyExist', function(source, cb, p
 end)
 
 ESX.RegisterServerCallback('Alf-Carkeys:getPlayersKeys', function(source, cb, id, plate, state)
-    local identifier = getIdentifiant(GetPlayerIdentifiers(source))
+    local xPlayer = ESX.GetPlayerFromId(source)
     MySQL.Async.fetchAll('SELECT * FROM vehicle_keys WHERE identifier = @identifier', {
-        ['@identifier'] = identifier
+        ['@identifier'] = xPlayer.identifier
     }, function(keys)
         if keys ~= nil then
             cb(keys)
@@ -218,9 +214,9 @@ ESX.RegisterServerCallback('Alf-Carkeys:getPlayersKeys', function(source, cb, id
 end)
 
 ESX.RegisterServerCallback('Alf-Carkeys:getPlayersKeysOriginal', function(source, cb, id, plate, state)
-    local identifier = getIdentifiant(GetPlayerIdentifiers(source))
+    local xPlayer = ESX.GetPlayerFromId(source)
     MySQL.Async.fetchAll('SELECT * FROM vehicle_keys WHERE identifier = @identifier AND state="Original"', {
-        ['@identifier'] = identifier
+        ['@identifier'] = xPlayer.identifier
     }, function(keys)
         if keys ~= nil then
             cb(keys)
@@ -231,9 +227,9 @@ ESX.RegisterServerCallback('Alf-Carkeys:getPlayersKeysOriginal', function(source
 end)
 
 ESX.RegisterServerCallback('Alf-Carkeys:getPlayersKeysCopy', function(source, cb, id, plate, state)
-    local identifier = getIdentifiant(GetPlayerIdentifiers(source))
+    local xPlayer = ESX.GetPlayerFromId(source)
     MySQL.Async.fetchAll('SELECT * FROM vehicle_keys WHERE identifier = @identifier AND state="Kopie"', {
-        ['@identifier'] = identifier
+        ['@identifier'] = xPlayer.identifier
     }, function(keys)
         if keys ~= nil then
             cb(keys)
